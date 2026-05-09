@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}DevTalk{% endblock %}</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Georgia, serif; font-size: 15px; background: #f5f5f0; color: #222; }
+a { color: #2a5db0; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.nav { background: #1a1a2e; color: #fff; padding: 12px 24px; display: flex; align-items: center; gap: 20px; }
+.nav .brand { font-size: 20px; font-weight: bold; color: #fff; }
+.nav .brand span { color: #7eb8f7; }
+.nav a { color: #ccc; font-size: 14px; }
+.nav a:hover { color: #fff; text-decoration: none; }
+.nav-right { margin-left: auto; display: flex; gap: 16px; align-items: center; }
+.container { max-width: 860px; margin: 0 auto; padding: 20px 16px; }
+.btn { display: inline-block; padding: 7px 16px; background: #2a5db0; color: #fff; border: none; border-radius: 3px; cursor: pointer; font-size: 14px; font-family: Georgia, serif; }
+.btn:hover { background: #1f4a8a; text-decoration: none; }
+.btn-sm { padding: 4px 10px; font-size: 13px; }
+.btn-outline { background: transparent; color: #2a5db0; border: 1px solid #2a5db0; }
+.btn-outline:hover { background: #2a5db0; color: #fff; }
+.error { background: #fde8e8; border: 1px solid #e07070; padding: 10px 16px; margin-bottom: 16px; border-radius: 4px; font-size: 14px; color: #900; }
+input[type=text], input[type=password], textarea, select { width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 3px; font-size: 14px; font-family: Georgia, serif; }
+textarea { resize: vertical; min-height: 100px; }
+label { display: block; margin-bottom: 4px; font-size: 14px; font-weight: bold; color: #444; }
+.form-group { margin-bottom: 16px; }
+.post-card { background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 16px; margin-bottom: 12px; }
+.post-meta { font-size: 13px; color: #777; margin-bottom: 8px; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.tag { background: #e8f0fe; color: #2a5db0; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+.vote-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.vote-btn { background: #f0f0f0; border: 1px solid #ccc; border-radius: 3px; padding: 2px 8px; cursor: pointer; font-size: 14px; }
+.vote-btn:hover { background: #ddd; }
+.score { font-weight: bold; min-width: 24px; text-align: center; }
+.sidebar { float: right; width: 190px; margin-left: 20px; }
+.sidebar h3 { font-size: 13px; color: #555; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+.sidebar .tag { display: block; margin-bottom: 5px; }
+.main-content { overflow: hidden; }
+.comment { border-left: 3px solid #e0e0e0; padding: 10px 12px; margin-bottom: 10px; background: #fafafa; }
+.comment.reply { margin-left: 24px; border-left-color: #b0c4de; }
+.comment-meta { font-size: 12px; color: #888; margin-bottom: 4px; }
+.comment-body { font-size: 14px; margin-bottom: 6px; }
+.reply-form { margin-top: 8px; display: none; }
+.reply-toggle { font-size: 12px; color: #2a5db0; cursor: pointer; background: none; border: none; padding: 0; }
+.reply-toggle:hover { text-decoration: underline; }
+.search-bar { display: flex; gap: 8px; margin-bottom: 20px; }
+.search-bar input { flex: 1; }
+h1 { font-size: 22px; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+<div class="nav">
+  <a class="brand" href="/">Dev<span>Talk</span></a>
+  <a href="/">Home</a>
+  {% if user %}
+    <a href="/post/new">New Post</a>
+    <div class="nav-right">
+      <span style="color:#aaa;font-size:13px;">{{ user.username }}</span>
+      <a href="/logout">Log out</a>
+    </div>
+  {% else %}
+    <div class="nav-right">
+      <a href="/login">Log in</a>
+      <a href="/register" style="background:#2a5db0;color:#fff;padding:5px 12px;border-radius:3px;">Register</a>
+    </div>
+  {% endif %}
+</div>
+<div class="container">
+  {% block content %}{% endblock %}
+</div>
+<script>
+function doVote(postId, commentId, dir) {
+  fetch('/api/vote', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({post_id: postId, comment_id: commentId, direction: dir})
+  }).then(r => r.json()).then(data => {
+    if (data.score !== undefined) {
+      var sid = postId ? 'score-p-' + postId : 'score-c-' + commentId;
+      document.getElementById(sid).textContent = data.score;
+    }
+  });
+}
+function toggleReply(id) {
+  var el = document.getElementById(id);
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+</script>
+</body>
+</html>

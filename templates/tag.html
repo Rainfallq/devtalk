@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Tag: {{ tag.name }} - DevTalk{% endblock %}
+{% block content %}
+<div style="margin-bottom:12px;font-size:13px;color:#888;"><a href="/">Home</a> / Tag</div>
+<h1>Posts tagged: {{ tag.name }}</h1>
+<div style="margin-top:16px;">
+{% for post in posts %}
+  <div class="post-card">
+    <h2 style="font-size:17px;margin-bottom:6px;"><a href="/post/{{ post.id }}">{{ post.title }}</a></h2>
+    <div class="post-meta">by {{ post.author.username }} - {{ post.created_at.strftime('%d %b %Y, %H:%M') }}</div>
+    <div style="font-size:14px;color:#444;margin-bottom:8px;">{{ post.body[:200] }}{% if post.body|length > 200 %}...{% endif %}</div>
+    <span style="font-size:13px;color:#888;">Score: {{ post_scores[post.id|string] }} - <a href="/post/{{ post.id }}">read more</a></span>
+  </div>
+{% else %}
+  <p style="color:#888;">No posts with this tag yet.</p>
+{% endfor %}
+</div>
+{% endblock %}

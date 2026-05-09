@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }} - DevTalk{% endblock %}
+{% block content %}
+<div style="margin-bottom:12px;font-size:13px;color:#888;"><a href="/">Home</a> / Post</div>
+<div class="post-card">
+  <h1 style="font-size:20px;margin-bottom:8px;">{{ post.title }}</h1>
+  <div class="post-meta">by <strong>{{ post.author.username }}</strong> - {{ post.created_at.strftime('%d %b %Y, %H:%M') }}</div>
+  <div class="tags" style="margin-bottom:12px;">
+    {% for tag in post.tags %}<a class="tag" href="/tag/{{ tag.id }}">{{ tag.name }}</a>{% endfor %}
+  </div>
+  <div style="font-size:15px;line-height:1.7;margin-bottom:16px;white-space:pre-wrap;">{{ post.body }}</div>
+  <div class="vote-row">
+    {% if user and user.sub|int != post.author_id %}
+      <button class="vote-btn" onclick="doVote({{ post.id }}, null, 1)">+ Upvote</button>
+    {% elif not user %}
+      <span style="font-size:13px;color:#888;"><a href="/login">Log in</a> to vote</span>
+    {% endif %}
+    <span class="score" id="score-p-{{ post.id }}">{{ score }}</span>
+    {% if user and user.sub|int != post.author_id %}
+      <button class="vote-btn" onclick="doVote({{ post.id }}, null, -1)">- Downvote</button>
+    {% endif %}
+  </div>
+</div>
+
+<h2 style="margin:20px 0 12px;font-size:16px;">Comments ({{ top_comments|length }})</h2>
+
+{% for c in top_comments %}
+<div class="comment">
+  <div class="comment-meta">
+    <strong>{{ c.author.username }}</strong> - {{ c.created_at.strftime('%d %b %Y, %H:%M') }}
+    {% if user and user.sub|int != c.author_id %}
+      &nbsp;<button class="vote-btn" style="font-size:12px;padding:1px 6px;" onclick="doVote(null, {{ c.id }}, 1)">+</button>
+    {% endif %}
+    <span class="score" id="score-c-{{ c.id }}">{{ comment_scores[c.id] }}</span>
+    {% if user and user.sub|int != c.author_id %}
+      <button class="vote-btn" style="font-size:12px;padding:1px 6px;" onclick="doVote(null, {{ c.id }}, -1)">-</button>
+    {% endif %}
+  </div>
+  <div class="comment-body">{{ c.body }}</div>
+  {% if user %}
+    <button class="reply-toggle" onclick="toggleReply('reply-{{ c.id }}')">Reply</button>
+    <div class="reply-form" id="reply-{{ c.id }}">
+      <form method="post" action="/post/{{ post.id }}/comment">
+        <input type="hidden" name="parent_id" value="{{ c.id }}">
+        <textarea name="body" rows="2" placeholder="Write a reply..." style="margin-bottom:6px;"></textarea>
+        <button type="submit" class="btn btn-sm">Post reply</button>
+      </form>
+    </div>
+  {% endif %}
+  {% for reply in c.replies %}
+  <div class="comment reply">
+    <div class="comment-meta">
+      <strong>{{ reply.author.username }}</strong> replying to <em>{{ c.author.username }}</em> - {{ reply.created_at.strftime('%d %b %Y, %H:%M') }}
+      {% if user and user.sub|int != reply.author_id %}
+        &nbsp;<button class="vote-btn" style="font-size:12px;padding:1px 6px;" onclick="doVote(null, {{ reply.id }}, 1)">+</button>
+      {% endif %}
+      <span class="score" id="score-c-{{ reply.id }}">{{ comment_scores[reply.id] }}</span>
+      {% if user and user.sub|int != reply.author_id %}
+        <button class="vote-btn" style="font-size:12px;padding:1px 6px;" onclick="doVote(null, {{ reply.id }}, -1)">-</button>
+      {% endif %}
+    </div>
+    <div class="comment-body">{{ reply.body }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p style="color:#888;font-size:14px;">No comments yet.</p>
+{% endfor %}
+
+{% if user %}
+<div style="margin-top:20px;">
+  <h3 style="font-size:15px;margin-bottom:10px;">Add a comment</h3>
+  <form method="post" action="/post/{{ post.id }}/comment">
+    <textarea name="body" rows="3" placeholder="Write your comment..."></textarea>
+    <button type="submit" class="btn" style="margin-top:8px;">Post comment</button>
+  </form>
+</div>
+{% else %}
+<p style="margin-top:16px;font-size:14px;"><a href="/login">Log in</a> to comment.</p>
+{% endif %}
+{% endblock %}

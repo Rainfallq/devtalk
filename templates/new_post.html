@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}New Post - DevTalk{% endblock %}
+{% block content %}
+<h1>Create a post</h1>
+<div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:24px;margin-top:16px;">
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
+  <form method="post" action="/post/new">
+    <div class="form-group">
+      <label>Title (max 150 characters)</label>
+      <input type="text" name="title" maxlength="150" required>
+    </div>
+    <div class="form-group">
+      <label>Body (min 20 characters)</label>
+      <textarea name="body" rows="8" required></textarea>
+    </div>
+    <div class="form-group">
+      <label>Tags - select at least one</label>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
+        {% for tag in tags %}
+          <label style="font-weight:normal;display:flex;align-items:center;gap:4px;">
+            <input type="checkbox" name="tags" value="{{ tag.id }}"> {{ tag.name }}
+          </label>
+        {% endfor %}
+      </div>
+      <input type="text" name="new_tag" placeholder="Or suggest a new tag (leave blank if using existing)">
+    </div>
+    <button type="submit" class="btn">Publish post</button>
+    <a href="/" style="margin-left:12px;font-size:14px;">Cancel</a>
+  </form>
+</div>
+{% endblock %}

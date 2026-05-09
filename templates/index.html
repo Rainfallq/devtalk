@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}DevTalk - Home{% endblock %}
+{% block content %}
+<div class="sidebar">
+  <h3>Tags</h3>
+  {% for tag in tags %}
+    <a class="tag" href="/tag/{{ tag.id }}">{{ tag.name }}</a>
+  {% endfor %}
+</div>
+<div class="main-content">
+  <form class="search-bar" method="get" action="/">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search posts...">
+    <button type="submit" class="btn btn-sm">Search</button>
+    {% if q %}<a href="/" class="btn btn-sm btn-outline">Clear</a>{% endif %}
+  </form>
+  {% if q %}
+    <p style="margin-bottom:14px;font-size:14px;color:#555;">{{ posts|length }} result(s) for "{{ q }}"</p>
+  {% endif %}
+  {% if not user %}
+    <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:14px;margin-bottom:16px;font-size:14px;">
+      <strong>Welcome to DevTalk.</strong> Browse posts below. <a href="/register">Register</a> or <a href="/login">log in</a> to post and vote.
+    </div>
+  {% endif %}
+  {% for post in posts %}
+    <div class="post-card">
+      <h2 style="font-size:17px;margin-bottom:6px;"><a href="/post/{{ post.id }}">{{ post.title }}</a></h2>
+      <div class="post-meta">by {{ post.author.username }} - {{ post.created_at.strftime('%d %b %Y, %H:%M') }}</div>
+      <div style="font-size:14px;color:#444;margin-bottom:10px;">{{ post.body[:200] }}{% if post.body|length > 200 %}...{% endif %}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="tags">
+          {% for tag in post.tags %}<a class="tag" href="/tag/{{ tag.id }}">{{ tag.name }}</a>{% endfor %}
+        </div>
+        <div class="vote-row">
+          {% if user and user.sub|int != post.author_id %}
+            <button class="vote-btn" onclick="doVote({{ post.id }}, null, 1)">+</button>
+          {% endif %}
+          <span class="score" id="score-p-{{ post.id }}">{{ post_scores[post.id|string] }}</span>
+          {% if user and user.sub|int != post.author_id %}
+            <button class="vote-btn" onclick="doVote({{ post.id }}, null, -1)">-</button>
+          {% endif %}
+          <a href="/post/{{ post.id }}" style="font-size:13px;color:#888;">discuss</a>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <p style="color:#888;font-size:14px;">No posts yet. {% if user %}<a href="/post/new">Create the first one.</a>{% endif %}</p>
+  {% endfor %}
+</div>
+{% endblock %}
